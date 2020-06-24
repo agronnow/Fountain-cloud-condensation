@@ -329,80 +329,24 @@ void PatchPluto::computeRefGradient(FArrayBox& gFab, FArrayBox& UFab,
     if (grad[k][j][i] > RefThresh) {nrefgrad++;}
     #endif
 
+    //Refine based on cooling time in addition to density gradient
+    //This is an experimental feature and was not used in Grønnow, Tepper-Garcia & Bland-Hawthorn (2018)
     #if REF_CRIT == 3
     if (grad[k][j][i] < RefThresh) //Don't bother if the cell is going to be flagged for refinement anyway
     {
-      /* ---------------------------------------------                                                                                                                                         
-                Get pressure and temperature                                                                                                                                                 
-      --------------------------------------------- */
-
-      /*      static int ntabmu;
-      static double *mu_tab, *Tmu_tab;
-      FILE *fmu;
-      double cmu;*/
       double a, b, c;
       int count, maxiter;
       double tolerance = 0.05;
-/*      
-      double dummy1, dummy2;
 
-      if (Tmu_tab == NULL) //Read mu table
-      {
-	  print1 (" > Reading mu table from disk...\n");
-	  fmu = fopen("mutable.dat","r");
-	  if (fmu == NULL){
-	    print1 ("! Radiat: mutable.dat could not be found.\n");
-	    QUIT_PLUTO(1);
-	  }
-	  mu_tab = ARRAY_1D(20000, double);
-	  Tmu_tab = ARRAY_1D(20000, double);
-
-	  ntabmu = 0;
-	  while (fscanf(fmu, "%lf %lf %lf %lf\n", Tmu_tab + ntabmu, &dummy1, &dummy2,
-			mu_tab + ntabmu)!=EOF) {
-	    ntabmu++;
-	  }
-	  }*/
-
-      //  print("Ntab: %d\n",ntab);
-        count = 0;
+      count = 0;
       tolerance = 0.05;
       maxiter = 100;
-/*      cmu = 0.0;
-      int niter;
-      niter = 0;
-*/
 
       double rho = UU[RHO][k][j][i];
       double prs = UU[PRS][k][j][i];
-      //Find temperature and mu as root of mu(T)*P/(k_B*rho) - T=0 using secant method
+      //Find temperature and mu as root of mu(T)*P/(k_B*rho) - T=0 using the Brent method
       a = prs*((double)g_mu_tab[0]+tolerance)*KELVIN/rho;
       b = prs*((double)g_mu_tab[g_ntabmu-1]-tolerance)*KELVIN/rho;
-      //      do
-      //{
-	  /*
-	    if(f(a)==f(b))
-	    {
-	    printf("\nSolution cannot be found as the values of a and b are same.\n");
-	    return;
-	    }
-	  */
-      /*	  c=(a*fT(b, &cmu, prs, rho, T_tab, mu_tab, ntab)-b*fT(a, &cmu, prs, rho, T_tab, mu_tab, ntab))/(fT(b, &cmu, prs, rho, T_tab, mu_tab, ntab)-fT(a, &cmu, prs, rho, T_tab, mu_tab, ntab));
-
-	  a=b;
-	  b=c;
-	  //  print("Iteration No-%d    a,b,c=%f %f %f\n",count,a,b,c);
-	  count++;
-	  if(count == maxiter)
-	    {
-	      printf("T did not converge within %d steps!\n", maxiter);
-	      break;
-	    }
-      } while(fabs(c-b)/b > tolerance);  //fabs(fT(c, &cmu, d, T_tab, mu_tab, ntab, i, j, k)) > tolerance);
-
-      fT(c, &cmu, prs, rho, T_tab, mu_tab, ntab); //Update mu
-      T = c;
-      mu = cmu;*/
       temperature_params par;
       par.mu = -1;
       par.rho = rho;
@@ -414,13 +358,6 @@ void PatchPluto::computeRefGradient(FArrayBox& gFab, FArrayBox& UFab,
 	QUIT_PLUTO(1);
       }
       mu = par.mu;
-      //    if (niter==1000) {print("i,j,k: %d %d %d T: %f mu: %f rho: %f\n",i,j,k,T[k][j][i],mu[k][j][i],d->Vc[RHO][k][j][i]);niter=0;}
-      niter++;
-
-
-      //  mu  = g_inputParam[MU_C];
-      //  T   = UU[PRS][k][j][i]/UU[RHO][k][j][i]*KELVIN*mu;
-      //  print1("T, prs, mu, gamma: %12.6e %6.4e %12.6e\n", T, UU[PRS][k][j][i], mu, g_gamma);
 
       if (T != T){
 	printf (" ! Nan found in TagCells on proc %d at %f, %f, %f (%d, %d, %d)\n", prank, x1, x2, x3, i, j, k);
