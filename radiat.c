@@ -183,7 +183,7 @@ void Radiat (double *v, double *rhs)
   tolerance = 0.05;
 
   double rho = v[RHO];
-  //Find temperature and mu as root of mu(T)*P/(k_B*rho) - T=0 using secant method
+  //Find temperature and mu as root of mu(T)*P/(k_B*rho) - T=0 using the Brent method
   a = prs*((double)g_mu_tab[0]+tolerance)*KELVIN/rho;
   b = prs*((double)g_mu_tab[g_ntabmu-1]-tolerance)*KELVIN/rho;
 
@@ -303,6 +303,7 @@ double MeanMolecularWeight (double *V)
  *
  ********************************************************************* */
 {
+  //This assumes fully ionised gas, to properly calculate the mean molecular weight for a given temperature call GetMuFromTable instead
   return (0.59);//v[TRC_MU]);
 /*
   return  ( (A_H + frac_He*A_He + frac_Z*A_Z) /
