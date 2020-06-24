@@ -8,7 +8,6 @@
   It is automatically searched for by the makefile.
 
   \author Asger Gronnow (asger.gronnow@usyd.edu.au)
-  \date   Nov 2015
 */
 /* ///////////////////////////////////////////////////////////////////// */
 #include "pluto.h"
@@ -505,19 +504,11 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   static int niter = 0;
 
   if (side == 0) {    /* -- check solution inside domain -- */
- //   DOM_LOOP(k,j,i){};
     TOT_LOOP(k,j,i){
       if (d->Vc[RHO][k][j][i] < g_smallDensity) {d->Vc[RHO][k][j][i] = g_smallDensity;}
       if (d->Vc[PRS][k][j][i] < g_smallPressure) {d->Vc[PRS][k][j][i] = g_smallPressure;}
       if (d->Vc[TRC][k][j][i] < 0.0) {d->Vc[TRC][k][j][i] = 0.0;}     
       if (d->Vc[TRC_Z][k][j][i] < 0.0) {d->Vc[TRC_Z][k][j][i] = 0.0;}
-      /*      if (grid[IDIR].x[i] < -1.8)
-      {
-	d->Vc[BX1][k][j][i] = sqrt(2*PrsWind/(3*g_inputParam[BETA_W]));
-	d->Vc[BX2][k][j][i] = sqrt(2*PrsWind/(3*g_inputParam[BETA_W]));
-	d->Vc[BX3][k][j][i] = sqrt(2*PrsWind/(3*g_inputParam[BETA_W]));
-	d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
-      }*/
     }
   }
   // set wind (inflow) properties
